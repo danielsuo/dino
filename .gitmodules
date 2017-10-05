@@ -1,0 +1,3 @@
+[submodule "bloom/bud"]
+	path = bloom/bud
+	url = https://github.com/bloom-lang/bud
