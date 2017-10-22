@@ -2,7 +2,6 @@ package dino
 
 import breeze.linalg._
 import akka.actor.{ Actor, ActorLogging, ActorRef, ActorSystem, Props }
-import akka.contrib.pattern.Aggregator
 import scala.io.StdIn
 
 object MatrixCreator {
