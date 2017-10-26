@@ -1,7 +1,7 @@
-import typing
-
 import glog as log
+import typing
 import json
+
 
 class SubTask:
     def __init__(self, id_: str) -> None:
@@ -15,6 +15,7 @@ class SubTask:
         #  assert 'id' in defn, 'Missing id for subtask'
 
         #  subtask = cls(defn['id'])
+
 
 class Task:
     def __init__(self, defn_file: str = None) -> None:
@@ -44,6 +45,6 @@ class Task:
         self.graph[id_] = dst
 
 
-
-a = Task('tasks/test.json');
+log.info("Hello! Welcome to Dino!")
+a = Task('tasks/test.json')
 print(a.graph['A'])

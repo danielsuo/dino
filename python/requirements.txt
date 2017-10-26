@@ -1,1 +1,11 @@
 glog
+
+# Dev requirements
+neovim
+pyflakes
+flake8
+pylint
+mypy
+rope
+ropemode
+ropevim
