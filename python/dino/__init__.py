@@ -2,6 +2,7 @@ import glog as log
 import typing
 import json
 
+from .vertex import Vertex
 
 class SubTask:
     def __init__(self, id_: str) -> None:

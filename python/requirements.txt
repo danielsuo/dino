@@ -1,4 +1,9 @@
 glog
+numpy
+pathos
+tqdm
+pandas
+matplotlib
 
 # Dev requirements
 neovim
