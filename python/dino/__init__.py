@@ -3,6 +3,7 @@ import typing
 import json
 
 from .vertex import Vertex
+from .graph import Graph
 
 class SubTask:
     def __init__(self, id_: str) -> None:
