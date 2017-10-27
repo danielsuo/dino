@@ -1,11 +1,26 @@
-glog
-numpy
-pathos
-tqdm
-pandas
-matplotlib
+cython
 
-# Dev requirements
+# Instrumentation
+glog
+tqdm
+
+# Numerical
+numpy
+pandas
+
+# System
+pathos
+psutil
+
+# Serialization
+cloudpickle
+pyarrow
+
+# Plotting
+matplotlib
+palettable
+
+# Development
 neovim
 pyflakes
 flake8
