@@ -1,0 +1,2 @@
+vname = str
+argname = str

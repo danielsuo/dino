@@ -1,5 +1,6 @@
 import typing
 from .vertex import Vertex
+from .types import vname, argname
 
 from collections import deque
 
@@ -24,83 +25,79 @@ def topological(graph):
 
 class Graph:
     def __init__(self):
-        self.vertices: typing.Dict[int, Vertex] = {}
-        self.edges: typing.Dict[int, typing.Dict[int, str]] = {}
+        self.vertices: typing.Dict[vname, Vertex] = {}
+        self.edges: typing.Dict[vname, typing.Dict[vname, argname]] = {}
 
-    def addVertex(self, vertex: Vertex) -> None:
-        assert vertex.function is not None, 'Function for vertex %s not set' % vertex.id
+    def addVertex(self, name: vname, function: typing.Callable) -> None:
+        assert name not in self.vertices, 'Vertex named %s already in graph' % name
 
-        self.vertices[vertex.id] = vertex
+        self.vertices[name] = Vertex(name, function)
 
         # Don't delete edges if vertex existed before
-        if vertex.id not in self.edges:
-            self.edges[vertex.id] = {}
+        if name not in self.edges:
+            self.edges[name] = {}
 
-    def addVertices(self, *vertices: Vertex) -> None:
-        for vertex in vertices:
-            self.addVertex(vertex)
+    def removeVertex(self, name: vname) -> None:
+        self.checkVertex(name)
+        for src in self.edges:
+            self.removeEdge(src, name)
 
-    def removeVertex(self, vertex: Vertex) -> None:
-        self.checkVertex(vertex.id)
-        for vid2 in self.edges:
-            self.removeEdge(self.vertices[vid2], vertex)
+        del self.vertices[name]
+        del self.edges[name]
 
-        del self.vertices[vertex.id]
-        del self.edges[vertex.id]
+    def removeVertices(self, *names: vname) -> None:
+        for name in names:
+            self.removeVertex(name)
 
-    def removeVertices(self, *vertices: Vertex) -> None:
-        for vertex in vertices:
-            self.removeVertex(vertex)
+    def addEdge(self, src: vname, dst: vname, arg: argname) -> None:
+        self.checkVertex(src)
+        self.checkVertex(dst)
 
-    def addEdge(self, v1: Vertex, v2: Vertex, arg: str) -> None:
-        self.checkVertex(v1.id)
-        self.checkVertex(v2.id)
+        assert arg in self.vertices[dst].args, 'Vertex %s output to vertex %s with arg %s does not exist' % (src, dst, arg)
+        assert arg not in self.getFulfilledArgs(dst), 'Arg %s already fulfilled for vertex %s' % (arg, dst)
 
-        assert arg in v2.args, 'Vertex %d output to vertex %d with arg %s does not exist' % (v1.id, v2.id, arg)
-        assert arg not in self.getFulfilledArgs(v2.id), 'Arg %s already fulfilled for vertex %d' % (arg, v2.id)
+        if dst not in self.edges[src]:
+            self.edges[src][dst] = arg
 
-        if v2.id not in self.edges[v1.id]:
-            self.edges[v1.id][v2.id] = arg
-
-    def removeEdge(self, v1: Vertex, v2: Vertex) -> None:
-        self.checkVertex(v1.id)
-        self.checkVertex(v2.id)
+    def removeEdge(self, src: vname, dst: vname) -> None:
+        self.checkVertex(src)
+        self.checkVertex(dst)
 
         # This could be a no-op
-        if v1.id in self.edges and v2.id in self.edges[v1.id]:
-            del self.edges[v1.id][v2.id]
+        if src in self.edges and dst in self.edges[src]:
+            del self.edges[src][dst]
 
-    def checkVertex(self, vid: int) -> None:
-        assert vid in self.vertices, 'Vertex id %s not found in graph' % vid
+    def checkVertex(self, name: vname) -> None:
+        assert name in self.vertices, 'Vertex id %s not found in graph' % name
 
     # TODO: this should probably be computed, stored, and updated appropriately
-    def getSources(self) -> typing.Dict[int, Vertex]:
-        sources: typing.Dict[int, Vertex] = {}
-        vids: typing.Set[int] = set()
+    def getSources(self) -> typing.Dict[vname, Vertex]:
+        sources: typing.Dict[vname, Vertex] = {}
+        names: typing.Set[vname] = set()
 
-        for vid in self.edges:
-            vids.update(self.edges[vid].keys())
+        for name in self.edges:
+            names.update(self.edges[name].keys())
 
-        vids = set(self.vertices.keys()).difference(vids)
+        names = set(self.vertices.keys()).difference(names)
 
-        sources = {vid: self.vertices[vid] for vid in vids}
+        sources = {name: self.vertices[name] for name in names}
         return sources
 
     # TODO: this should probably be computed, stored, and updated appropriately
-    def getSinks(self) -> typing.Dict[int, Vertex]:
-        sinks: typing.Dict[int, Vertex] = {}
+    def getSinks(self) -> typing.Dict[vname, Vertex]:
+        sinks: typing.Dict[vname, Vertex] = {}
 
-        for vid in self.vertices:
-            if vid not in self.edges or len(self.edges[vid]) == 0:
-                sinks[vid] = self.vertices[vid]
+        for vname in self.vertices:
+            if vname not in self.edges or len(self.edges[vname]) == 0:
+                sinks[vname] = self.vertices[vname]
 
         assert len(sinks) == 1, 'For now, only support one and only one sink'
 
         return sinks
 
     # TODO: this should probably be computed, stored, and updated appropriately
-    def getDependencies(self, dst: int) -> typing.List[int]:
-        dependencies: typing.List[int] = []
+    def getDependencies(self, dst: vname) -> typing.List[vname]:
+        dependencies: typing.List[vname] = []
 
         for src in self.edges:
             if dst in self.edges[src]:
@@ -108,8 +105,8 @@ class Graph:
 
         return dependencies
 
-    def getFulfilledArgs(self, dst: int) -> typing.List[str]:
-        fulfilled: typing.List[str] = []
+    def getFulfilledArgs(self, dst: vname) -> typing.List[vname]:
+        fulfilled: typing.List[vname] = []
 
         for src in self.edges:
             if dst in self.edges[src]:
@@ -117,26 +114,26 @@ class Graph:
 
         return fulfilled
 
-    def run(self, data: typing.Dict[int, typing.Any]) -> typing.Any:
+    def run(self, data: typing.Dict[vname, typing.Any]) -> typing.Any:
         # TODO: check all vertices fulfilled
         sources = self.getSources()
 
-        for vid in sources:
-            assert vid in data, 'Data for source vertex %d not found' % vid
+        for name in sources:
+            assert name in data, 'Data for source vertex %s not found' % name
 
-        results: typing.Dict[int, typing.Any] = {}
+        results: typing.Dict[vname, typing.Any] = {}
 
         # TODO: for now, run in topological order
         order = topological(self.edges)
 
-        for vid in order:
-            args: typing.Dict[str, typing.Any] = {}
-            deps = self.getDependencies(vid)
-            for dep in deps:
-                args[self.edges[dep][vid]] = results[dep]
-            results[vid] = self.vertices[vid].run(**args)
+        for dst in order:
+            args: typing.Dict[vname, typing.Any] = {}
+            srcs = self.getDependencies(dst)
+            for src in srcs:
+                args[self.edges[src][dst]] = results[src]
+            results[dst] = self.vertices[dst].run(**args)
 
         return
 
     def __str__(self):
-        return '\n'.join(['%d: %s' % (vid1, ','.join([str(vid2) for vid2 in self.edges[vid1]])) for vid1 in self.edges])
+        return '\n'.join(['%s: %s' % (src, ','.join([str(dst) for dst in self.edges[src]])) for src in self.edges])
