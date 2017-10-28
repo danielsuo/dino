@@ -128,12 +128,15 @@ class Graph:
 
         for dst in order:
             args: typing.Dict[vname, typing.Any] = {}
-            srcs = self.getDependencies(dst)
-            for src in srcs:
-                args[self.edges[src][dst]] = results[src]
+            if dst in sources:
+                args = data[dst]
+            else:
+                srcs = self.getDependencies(dst)
+                for src in srcs:
+                    args[self.edges[src][dst]] = results[src]
             results[dst] = self.vertices[dst].run(**args)
 
-        return
+        return results
 
     def __str__(self):
         return '\n'.join(['%s: %s' % (src, ','.join([str(dst) for dst in self.edges[src]])) for src in self.edges])

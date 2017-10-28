@@ -17,11 +17,12 @@ class Vertex:
         Vertex.vid += 1
 
     def run(self, *args, **kwargs) -> typing.Any:
+        log.error('Computing vertex %s' % self.name)
         beg = time.time()
         result = self.function(*args, **kwargs)
         end = time.time()
-        log.info('Vertex %d took %sms' %
-                 (self.id, '{:,.2f}'.format((end - beg) * 1000)))
+        log.info('Vertex %s took %sms' %
+                 (self.name, '{:,.2f}'.format((end - beg) * 1000)))
         return result
 
     def __str__(self):
