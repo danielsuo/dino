@@ -1,4 +1,9 @@
+import dino
 import click
+import numpy as np
+import glog as log
+import pathos.multiprocessing as mp
+import pathos.helpers as mph
 
 @click.group(context_settings=dict(help_option_names=['-h', '--help']))
 def cli():
@@ -9,8 +14,6 @@ def graph():
     """
     Simple graph construction
     """
-    import dino
-    import numpy as np
 
     def forwardMatrix(mat: np.ndarray):
         return mat
@@ -47,5 +50,19 @@ def worker(num_workers):
     """
     Passing functions and data to workers
     """
-    import pathos.multiprocessing as mp
     click.echo('Hi worker %d!' % num_workers)
+
+    task_queues = []
+    result_queues = []
+    workers = []
+
+    for _ in range(num_workers):
+        task_queue = mph.mp.Queue()
+        result_queue = mph.mp.Queue()
+        worker = dino.Worker(task_queue, result_queue)
+        worker.start()
+
+        def test(): print('hello from worker!')
+        task_queue.put(test)
+        task_queue.put(None)
+
