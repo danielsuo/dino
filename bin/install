@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
 pushd python
-python setup.py develop
+pip install --editable .
 popd

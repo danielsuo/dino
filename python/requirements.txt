@@ -1,3 +1,7 @@
+# Argument parsing
+click
+
+# Bindings
 cython
 
 # Instrumentation
@@ -29,3 +33,4 @@ mypy
 rope
 ropemode
 ropevim
+ipython
