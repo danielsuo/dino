@@ -1,23 +1,48 @@
 import pathos.multiprocessing as mp
 import pathos.helpers as mph
 import glog as log
+import psutil
 
 class Worker(mph.mp.Process):
-    def __init__(self, task_queue, result_queue):
-        mph.mp.Process.__init__(self)
-        self.task_queue = task_queue
-        self.result_queue = result_queue
+    wid = 0
+    def __init__(self):
+        super(Worker, self).__init__()
+        self.task_queue = mph.mp.Queue()
+        self.result_queue = mph.mp.Queue()
+        self.id = Worker.wid
+        Worker.wid += 1
+
+        self.running = False
 
     def run(self):
         while True:
-            next_task = self.task_queue.get()
-            if next_task is None:
+            task: Task = self.task_queue.get()
+            if task is None:
                 # Received poison pill
-                log.info('%s: Exiting' % self.name)
+                log.info('Worker %d: Exiting' % self.id)
                 break
-
-            next_task()
-
+            task.func(*task.args, **task.kwargs)
         return
+
+    def start(self):
+        if not self.running:
+            super(Worker, self).start()
+            self.process = psutil.Process(self.pid)
+            self.running = True
+        else:
+            log.warn('Worker %d: cannot start more than once' % self.id)
+
+    def stop(self):
+        if self.running:
+            self.task_queue.put(None)
+            self.running = False
+        else:
+            log.warn('Worker %d: cannot stop more than once' % self.id)
+
+    def suspend(self):
+        self.process.suspend()
+
+    def resume(self):
+        self.process.resume()
 
 
