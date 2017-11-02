@@ -56,13 +56,13 @@ def worker(num_workers):
     result_queues = []
     workers = []
 
-    for _ in range(num_workers):
+    for i in range(num_workers):
         task_queue = mph.mp.Queue()
         result_queue = mph.mp.Queue()
         worker = dino.Worker(task_queue, result_queue)
         worker.start()
 
-        def test(): print('hello from worker!')
+        def test(): print('hello from worker %d!' % i)
         task_queue.put(test)
         task_queue.put(None)
 

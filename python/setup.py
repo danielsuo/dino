@@ -1,10 +1,5 @@
-#!/usr/bin/env python
-
 import os
 from setuptools import setup, find_packages
-
-# TODO: Bad, but some dependencies weren't installing correctly
-os.system('pip install -r requirements.txt')
 
 setup(
     name='dino',
