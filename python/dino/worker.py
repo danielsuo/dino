@@ -3,12 +3,15 @@ import pathos.helpers as mph
 import glog as log
 import psutil
 
+from .task import Task
+from .result import Result
+
 class Worker(mph.mp.Process):
     wid = 0
-    def __init__(self):
+    def __init__(self, result_queue):
         super(Worker, self).__init__()
         self.task_queue = mph.mp.Queue()
-        self.result_queue = mph.mp.Queue()
+        self.result_queue = result_queue
         self.id = Worker.wid
         Worker.wid += 1
 
@@ -21,7 +24,9 @@ class Worker(mph.mp.Process):
                 # Received poison pill
                 log.info('Worker %d: Exiting' % self.id)
                 break
-            task.func(*task.args, **task.kwargs)
+            data = task.func(*task.args, **task.kwargs)
+            result = Result(task.id, data)
+            self.result_queue.put(result)
         return
 
     def start(self):

@@ -114,6 +114,9 @@ class Graph:
 
         return fulfilled
 
+    def getTopological(self) -> typing.List[Vertex]:
+        return [self.vertices[vid] for vid in topological(self.edges)]
+
     def run(self, data: typing.Dict[vname, typing.Any]) -> typing.Any:
         # TODO: check all vertices fulfilled
         sources = self.getSources()

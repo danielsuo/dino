@@ -22,11 +22,13 @@ def graph_simple():
     g.addEdge('v1', 'v3', 'mat1')
     g.addEdge('v2', 'v3', 'mat2')
 
-    print(g)
-    print(g.getSources())
+    #  print(g)
+    #  print(g.getSources())
 
-    print('Running...')
-    mat = np.random.rand(100, 100)
-    results = g.run({'v1': {'mat': mat}})
+    #  print('Running...')
+    #  mat = np.random.rand(100, 100)
+    #  results = g.run({'v1': {'mat': mat}})
 
-    print(np.array_equal(results['v3'], np.matmul(mat, np.transpose(mat))))
+    #  print(np.array_equal(results['v3'], np.matmul(mat, np.transpose(mat))))
+
+    return g

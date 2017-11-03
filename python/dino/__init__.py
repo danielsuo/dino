@@ -7,6 +7,7 @@ from .graph import Graph
 from .worker import Worker
 from .scheduler import Scheduler
 from .task import Task
+from .result import Result
 
 """
 class SubTask:
